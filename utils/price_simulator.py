@@ -24,6 +24,6 @@ class PriceSimulator:
     #         .drop(columns=['market_cap', 'total_volume']))
     #     return price_df
     
-    def calculate_price_change(self, previous_price):
+    def calculate_price_change(self, previous_price: float):
         return choice(st.norm.rvs(loc=0.0, scale=0.05, size=10)) * previous_price
 
