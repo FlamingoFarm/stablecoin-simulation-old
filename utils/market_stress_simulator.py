@@ -1,5 +1,4 @@
 import numpy as np
-from random import choice
 
 class MarketStressSimulator:
     def __init__(self, rate: float=0.01):
@@ -11,4 +10,4 @@ class MarketStressSimulator:
         return self.__rate
     
     def event_occurrence(self):
-        return bool(choice(np.random.poisson(self.__rate, size=10)))
+        return bool(np.random.poisson(self.__rate))

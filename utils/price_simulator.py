@@ -1,6 +1,5 @@
 import pandas as pd
 import scipy.stats as st
-from random import choice
 
 class PriceSimulator:
     # def __init__(self, csv_filename: str='../data/eth-max.csv'):  
@@ -26,15 +25,12 @@ class PriceSimulator:
     
     def calculate_price_change(self, previous_price: float, price_shock: bool=False):
         if price_shock:
-            return choice(self.__generate_price_shock_change_rates()) * previous_price
+            return self.__generate_price_shock_change_rates() * previous_price
         else:
-            return choice(st.norm.rvs(loc=0.0, scale=0.05, size=10)) * previous_price
+            return st.norm.rvs(loc=0.0, scale=0.05) * previous_price
 
     def __generate_price_shock_change_rates(self):
-        result = st.norm.rvs(loc=0.0, scale=0.5, size=15)
-        result = [x for x in result if 0.1 <= abs(x) <= 0.85]
-        while len(result) < 10:
-            rate = st.norm.rvs(loc=0.0, scale=1)
-            if 0.1 <= abs(rate) <= 0.85:
-                result.append(rate)
+        result = 0
+        while not 0.1 <= abs(result) <= 0.85:
+            result = st.norm.rvs(loc=0.0, scale=0.5)
         return result
