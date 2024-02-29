@@ -25,11 +25,11 @@ class PriceSimulator:
     
     def calculate_price_change(self, previous_price: float, price_shock: bool=False):
         if price_shock:
-            return self.__generate_price_shock_change_rates() * previous_price
+            return self.__generate_price_shock_change_rate() * previous_price
         else:
             return st.norm.rvs(loc=0.0, scale=0.05) * previous_price
 
-    def __generate_price_shock_change_rates(self):
+    def __generate_price_shock_change_rate(self):
         result = 0
         while not 0.1 <= abs(result) <= 0.85:
             result = st.norm.rvs(loc=0.0, scale=0.5)
