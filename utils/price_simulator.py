@@ -30,14 +30,14 @@ class PriceSimulator:
     #         .drop(columns=['market_cap', 'total_volume']))
     #     return price_df
     
-    def calculate_price_change(self, previous_price: float):
+    def calculate_change_rate(self):
         if self.__market_stress and self.__event_occurrence():
             change_rate = self.__generate_price_shock_change_rate()
             negative_price_shock = change_rate < 0
-            return change_rate * previous_price, negative_price_shock
+            return change_rate, negative_price_shock
         else:
             change_rate = st.norm.rvs(loc=0.0, scale=0.05)
-            return change_rate * previous_price, False
+            return change_rate, False
     
     def __event_occurrence(self):
         return bool(np.random.poisson(self.__market_stress_rate))
