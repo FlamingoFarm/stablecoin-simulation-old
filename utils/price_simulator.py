@@ -1,7 +1,14 @@
+import numpy as np
 import pandas as pd
 import scipy.stats as st
 
 class PriceSimulator:
+    def __init__(self, market_stress: bool=True, market_stress_rate: float=0.01):
+        self.__market_stress = market_stress
+        if market_stress_rate < 0:
+            raise Exception("The average event frequency per time interval cannot be negative")
+        self.__market_stress_rate = market_stress_rate
+        
     # def __init__(self, csv_filename: str='../data/eth-max.csv'):  
     #     self.price_df = self.__get_coll_prices(csv_filename)
     
@@ -23,11 +30,17 @@ class PriceSimulator:
     #         .drop(columns=['market_cap', 'total_volume']))
     #     return price_df
     
-    def calculate_price_change(self, previous_price: float, price_shock: bool=False):
-        if price_shock:
-            return self.__generate_price_shock_change_rate() * previous_price
+    def calculate_price_change(self, previous_price: float):
+        if self.__market_stress and self.__event_occurrence():
+            change_rate = self.__generate_price_shock_change_rate()
+            negative_price_shock = change_rate < 0
+            return change_rate * previous_price, negative_price_shock
         else:
-            return st.norm.rvs(loc=0.0, scale=0.05) * previous_price
+            change_rate = st.norm.rvs(loc=0.0, scale=0.05)
+            return change_rate * previous_price, False
+    
+    def __event_occurrence(self):
+        return bool(np.random.poisson(self.__market_stress_rate))
 
     def __generate_price_shock_change_rate(self):
         result = 0
