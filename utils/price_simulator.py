@@ -1,8 +1,14 @@
+import numpy as np
 import pandas as pd
 import scipy.stats as st
-from random import choice
 
 class PriceSimulator:
+    def __init__(self, market_stress: bool=True, market_stress_rate: float=0.01):
+        self.__market_stress = market_stress
+        if market_stress_rate < 0:
+            raise Exception("The average event frequency per time interval cannot be negative")
+        self.__market_stress_rate = market_stress_rate
+        
     # def __init__(self, csv_filename: str='../data/eth-max.csv'):  
     #     self.price_df = self.__get_coll_prices(csv_filename)
     
@@ -24,17 +30,20 @@ class PriceSimulator:
     #         .drop(columns=['market_cap', 'total_volume']))
     #     return price_df
     
-    def calculate_price_change(self, previous_price: float, price_shock: bool=False):
-        if price_shock:
-            return choice(self.__generate_price_shock_change_rates()) * previous_price
+    def calculate_change_rate(self):
+        if self.__market_stress and self.__event_occurrence():
+            change_rate = self.__generate_price_shock_change_rate()
+            negative_price_shock = change_rate < 0
+            return change_rate, negative_price_shock
         else:
-            return choice(st.norm.rvs(loc=0.0, scale=0.05, size=10)) * previous_price
+            change_rate = st.norm.rvs(loc=0.0, scale=0.05)
+            return change_rate, False
+    
+    def __event_occurrence(self):
+        return bool(np.random.poisson(self.__market_stress_rate))
 
-    def __generate_price_shock_change_rates(self):
-        result = st.norm.rvs(loc=0.0, scale=0.5, size=15)
-        result = [x for x in result if 0.1 <= abs(x) <= 0.85]
-        while len(result) < 10:
-            rate = st.norm.rvs(loc=0.0, scale=1)
-            if 0.1 <= abs(rate) <= 0.85:
-                result.append(rate)
+    def __generate_price_shock_change_rate(self):
+        result = 0
+        while not 0.1 <= abs(result) <= 0.85:
+            result = st.norm.rvs(loc=0.0, scale=0.5)
         return result
